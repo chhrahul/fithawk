@@ -1,0 +1,20 @@
+image: node:10-jessie
+
+check-dependencies:
+ stage: test
+ script:
+  - yarn install --frozen-lockfile --check-files
+
+test-on-gitlab:
+ variables:
+  TARGET_REPO: https://gitlab.com/gitlab-org/gitlab
+ stage: test
+ script:
+  - if [ ! -d src ]; then git clone --depth 1 ${TARGET_REPO} src; fi
+  - cd src
+  - yarn install --frozen-lockfile
+  - yarn add ${CI_REPOSITORY_URL}#${CI_COMMIT_SHA}
+  - yarn run eslint --ext js,vue src --fix
+  - yarn global add @quasar/cli
+  - quasar build
+ allow_failure: false
